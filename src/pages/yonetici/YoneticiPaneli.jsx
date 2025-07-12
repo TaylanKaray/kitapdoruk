@@ -115,16 +115,18 @@ const YoneticiPaneli = () => {
       if (isAdmin && token) {
         setUsersLoading(true);
         try {
-          const res = await axios.get(`${API_URL}/users/all`, {
+          const response = await axios.get(`${API_URL}/users`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          setUsers(res.data);
-        } catch {}
+          setUsers(response.data);
+        } catch (error) {
+          setUsers([]);
+        }
         setUsersLoading(false);
       }
     }
     fetchUsers();
-  }, [fetchUsers]);
+  }, [isAdmin, token]);
 
   const handleUserDelete = async (id) => {
     setUserActionLoading(true);
