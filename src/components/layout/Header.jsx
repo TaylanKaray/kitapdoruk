@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   InputBase,
