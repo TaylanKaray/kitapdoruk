@@ -1,18 +1,35 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export const login = createAsyncThunk(
   'auth/login',
-  async (credentials) => {
-    // Firebase authentication will be implemented here
-    return {};
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email: credentials.email,
+        password: credentials.sifre
+      });
+      localStorage.setItem('token', response.data.token);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Giriş hatası');
+    }
   }
 );
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (userData) => {
-    // Firebase registration will be implemented here
-    return {};
+  async (credentials, thunkAPI) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/register`, {
+        email: credentials.email,
+        password: credentials.sifre
+      });
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Kayıt hatası');
+    }
   }
 );
 

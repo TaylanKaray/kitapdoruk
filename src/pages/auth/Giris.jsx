@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/slices/authSlice';
+import { jwtDecode } from 'jwt-decode';
 
 const Giris = () => {
   const navigate = useNavigate();
@@ -35,9 +36,25 @@ const Giris = () => {
 
     try {
       await dispatch(login(formData)).unwrap();
+      // Token'ı al ve decode et
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded = jwtDecode(token);
+        if (decoded.isAdmin) {
+          navigate('/yonetici');
+          return;
+        }
+      }
       navigate('/');
     } catch (error) {
-      setHata('Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edin.');
+      // Backend'den gelen hata mesajını göster
+      if (error && error.message) {
+        setHata(error.message);
+      } else if (typeof error === 'string') {
+        setHata(error);
+      } else {
+        setHata('Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edin.');
+      }
     }
   };
 

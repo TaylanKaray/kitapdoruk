@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Container,
   Grid,
@@ -23,7 +24,7 @@ import {
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { addToCart } from '../store/slices/cartSlice';
-import { toggleFavorite, selectIsFavorite } from '../store/slices/favoritesSlice';
+import { addFavorite, removeFavorite, selectIsFavorite } from '../store/slices/favoritesSlice';
 
 const kategoriler = [
   {
@@ -156,7 +157,11 @@ const UrunKarti = ({ urun }) => {
   };
 
   const handleToggleFavorite = () => {
-    dispatch(toggleFavorite(urun));
+    if (isFavorite) {
+      dispatch(removeFavorite(urun.id));
+    } else {
+      dispatch(addFavorite(urun));
+    }
   };
 
   return (
@@ -247,6 +252,21 @@ const KategoriKarti = ({ kategori }) => {
 };
 
 const Anasayfa = () => {
+  const [urunler, setUrunler] = useState([]);
+
+  useEffect(() => {
+    const fetchUrunler = async () => {
+      try {
+        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${API_URL}/products`);
+        setUrunler(res.data);
+      } catch (err) {
+        setUrunler([]);
+      }
+    };
+    fetchUrunler();
+  }, []);
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       {/* Hero Section */}
@@ -352,31 +372,15 @@ const Anasayfa = () => {
 
       <Divider sx={{ my: 6 }} />
 
-      {/* Çok Satan Kitaplar */}
+      {/* Tüm Kitaplar */}
       <Box sx={{ mb: 6 }}>
         <Typography variant="h4" gutterBottom>
-          Çok Satan Kitaplar
+          Tüm Kitaplar
         </Typography>
         <Grid container spacing={3}>
-          {cokSatanKitaplar.map((kitap) => (
-            <Grid item xs={12} sm={6} md={3} key={kitap.id}>
-              <UrunKarti urun={kitap} />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-
-      <Divider sx={{ my: 6 }} />
-
-      {/* Yeni Çıkan Kitaplar */}
-      <Box sx={{ mb: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Yeni Çıkan Kitaplar
-        </Typography>
-        <Grid container spacing={3}>
-          {yeniCikanKitaplar.map((kitap) => (
-            <Grid item xs={12} sm={6} md={3} key={kitap.id}>
-              <UrunKarti urun={kitap} />
+          {urunler.map((urun) => (
+            <Grid item xs={12} sm={6} md={3} key={urun._id}>
+              <UrunKarti urun={urun} />
             </Grid>
           ))}
         </Grid>

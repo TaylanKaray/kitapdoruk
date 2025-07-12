@@ -70,6 +70,11 @@ const Header = () => {
     navigate('/arama');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/giris');
+  };
+
   return (
     <AppBar position="sticky" sx={{ bgcolor: 'white', color: 'text.primary' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -196,6 +201,9 @@ const Header = () => {
           </Button>
           <Button color="inherit" component={Link} to="/kayit">
             Üye Ol
+          </Button>
+          <Button color="inherit" onClick={handleLogout} style={{ marginLeft: 16, padding: '6px 12px', background: '#1976d2', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
+            Çıkış
           </Button>
         </Box>
       </Toolbar>

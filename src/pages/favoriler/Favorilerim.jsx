@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Container,
@@ -24,10 +24,14 @@ import {
 import { useNavigate } from 'react-router-dom';
 import {
   selectFavoriteItems,
-  removeFromFavorites,
+  fetchFavorites,
+  removeFavorite,
   clearFavorites,
 } from '../../store/slices/favoritesSlice';
 import { addToCart } from '../../store/slices/cartSlice';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const Favorilerim = () => {
   const dispatch = useDispatch();
@@ -36,6 +40,38 @@ const Favorilerim = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState(null);
   const [clearDialogOpen, setClearDialogOpen] = React.useState(false);
+  const [detailedFavorites, setDetailedFavorites] = React.useState([]);
+
+  // Kullanıcı token'ı localStorage'dan alınıyor
+  const token = localStorage.getItem('token');
+
+  // Favori ürünlerin tam bilgisi için ürünleri backend'den çek
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchFavorites(token));
+    }
+  }, [dispatch, token]);
+
+  useEffect(() => {
+    // Favori ürünlerin tam bilgisi için ürünleri backend'den çek
+    const fetchDetails = async () => {
+      if (favoriteItems.length > 0) {
+        // Favoriler backend'den sadece _id ile geliyorsa, ürün detaylarını çek
+        const ids = favoriteItems.map(item => item._id).join(',');
+        try {
+          const res = await axios.get(`${API_URL}/products`, {
+            params: { ids },
+          });
+          setDetailedFavorites(res.data.filter(p => favoriteItems.some(f => f._id === p._id)));
+        } catch {
+          setDetailedFavorites([]);
+        }
+      } else {
+        setDetailedFavorites([]);
+      }
+    };
+    fetchDetails();
+  }, [favoriteItems]);
 
   const handleDeleteClick = (item) => {
     setItemToDelete(item);
@@ -43,8 +79,8 @@ const Favorilerim = () => {
   };
 
   const confirmDelete = () => {
-    if (itemToDelete) {
-      dispatch(removeFromFavorites(itemToDelete.id));
+    if (itemToDelete && token) {
+      dispatch(removeFavorite({ productId: itemToDelete._id, token }));
     }
     setDeleteDialogOpen(false);
     setItemToDelete(null);
@@ -63,7 +99,24 @@ const Favorilerim = () => {
     dispatch(addToCart({ ...item, adet: 1 }));
   };
 
-  if (favoriteItems.length === 0) {
+  if (!token) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom>
+          Favorilerim sayfasını görmek için giriş yapmalısınız.
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/auth/giris')}
+        >
+          Giriş Yap
+        </Button>
+      </Container>
+    );
+  }
+
+  if (detailedFavorites.length === 0) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
         <FavoriteIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
@@ -101,8 +154,8 @@ const Favorilerim = () => {
           </Button>
         </Grid>
 
-        {favoriteItems.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+        {detailedFavorites.map((item) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item._id}>
             <Card>
               <CardMedia
                 component="img"

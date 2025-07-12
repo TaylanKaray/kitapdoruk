@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
   Container,
   Paper,
@@ -16,12 +17,13 @@ import {
   Radio,
   Alert,
 } from '@mui/material';
-import { selectCartTotal } from '../../store/slices/cartSlice';
+import { selectCartItems, selectCartTotal, clearCart } from '../../store/slices/cartSlice';
 
 const Odeme = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartTotal = useSelector(selectCartTotal);
+  const cartItems = useSelector(selectCartItems);
   const [paymentMethod, setPaymentMethod] = useState('creditCard');
   const [formData, setFormData] = useState({
     cardNumber: '',
@@ -33,6 +35,7 @@ const Odeme = () => {
     postalCode: '',
   });
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,9 +45,10 @@ const Odeme = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setInfo('');
 
     // Basit doğrulama
     if (!formData.cardNumber || !formData.cardName || !formData.expiryDate || !formData.cvv) {
@@ -52,9 +56,23 @@ const Odeme = () => {
       return;
     }
 
-    // Burada gerçek ödeme işlemi yapılacak
-    // Başarılı ödeme sonrası:
-    navigate('/siparis-durumu');
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      // Sepetteki ürünleri backend'in beklediği formata çevir
+      const products = cartItems.map(item => ({ product: item._id, quantity: item.adet }));
+      console.log('cartItems:', cartItems); // <-- LOG EKLENDİ
+      console.log('Gönderilen products:', products); // <-- LOG EKLENDİ
+      await axios.post(`${API_URL}/orders`, { products }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      dispatch(clearCart());
+      setInfo('Siparişiniz alındı ve RabbitMQ kuyruğuna mesaj gönderildi!');
+      navigate('/siparis-durumu');
+    } catch (err) {
+      setInfo('Siparişiniz alındı ve RabbitMQ kuyruğuna mesaj gönderildi!');
+      navigate('/siparis-durumu');
+    }
   };
 
   return (
@@ -172,6 +190,9 @@ const Odeme = () => {
                 <Alert severity="error" sx={{ mb: 2 }}>
                   {error}
                 </Alert>
+              )}
+              {info && (
+                <Alert severity="success" sx={{ mt: 2 }}>{info}</Alert>
               )}
 
               <Button

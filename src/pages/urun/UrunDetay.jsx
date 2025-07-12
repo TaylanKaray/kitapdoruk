@@ -24,13 +24,13 @@ import {
   Book,
 } from '@mui/icons-material';
 import { addToCart } from '../../store/slices/cartSlice';
-import { toggleFavorite, selectIsFavorite } from '../../store/slices/favoritesSlice';
+import { addFavorite, removeFavorite } from '../../store/slices/favoritesSlice';
 import { selectUrunById } from '../../store/slices/urunlerSlice';
 
 const UrunDetay = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const isFavorite = useSelector((state) => selectIsFavorite(state, id));
+  const isFavorite = useSelector((state) => (state.favorites.items || []).some((f) => f._id === id));
 
   const urun = useSelector((state) => selectUrunById(state, id));
 
@@ -50,11 +50,15 @@ const UrunDetay = () => {
   }
 
   const handleAddToCart = () => {
-    dispatch(addToCart(urun));
+    dispatch(addToCart({ ...urun, id: urun._id }));
   };
 
   const handleToggleFavorite = () => {
-    dispatch(toggleFavorite(urun));
+    if (isFavorite) {
+      dispatch(removeFavorite(urun));
+    } else {
+      dispatch(addFavorite(urun));
+    }
   };
 
   return (

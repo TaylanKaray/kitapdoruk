@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { urunGuncelle } from '../../store/slices/urunlerSlice';
 import {
   Dialog,
   DialogTitle,
@@ -14,6 +12,7 @@ import {
   MenuItem,
   Grid
 } from '@mui/material';
+import axios from 'axios';
 
 const kategoriler = [
   'Ana Sınıfı Kitapları',
@@ -26,23 +25,38 @@ const kategoriler = [
   'Sözlükler ve Ansiklopediler'
 ];
 
-const UrunDuzenle = ({ open, onClose, urun }) => {
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+const UrunDuzenle = ({ open, onClose, urun, onUrunGuncellendi }) => {
   const [formData, setFormData] = useState({
-    ad: '',
+    name: '',
     kategori: '',
-    fiyat: '',
-    stok: '',
-    aciklama: '',
+    price: '',
+    stock: '',
+    description: '',
     yayinevi: '',
     yazar: '',
     sayfaSayisi: '',
     isbn: '',
     resimUrl: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (urun) {
-      setFormData(urun);
+      setFormData({
+        name: urun.name || urun.ad || '',
+        kategori: urun.kategori || '',
+        price: urun.price || urun.fiyat || '',
+        stock: urun.stock || urun.stok || '',
+        description: urun.description || urun.aciklama || '',
+        yayinevi: urun.yayinevi || '',
+        yazar: urun.yazar || '',
+        sayfaSayisi: urun.sayfaSayisi || '',
+        isbn: urun.isbn || '',
+        resimUrl: urun.resimUrl || ''
+      });
     }
   }, [urun]);
 
@@ -54,12 +68,33 @@ const UrunDuzenle = ({ open, onClose, urun }) => {
     }));
   };
 
-  const dispatch = useDispatch();
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(urunGuncelle(formData));
-    onClose();
+    setLoading(true);
+    setError('');
+    const token = localStorage.getItem('token');
+    try {
+      const res = await axios.put(`${API_URL}/products/${urun._id}`, {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
+        kategori: formData.kategori,
+        yayinevi: formData.yayinevi,
+        yazar: formData.yazar,
+        sayfaSayisi: formData.sayfaSayisi,
+        isbn: formData.isbn,
+        resimUrl: formData.resimUrl
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (onUrunGuncellendi) onUrunGuncellendi(res.data.product || res.data);
+      onClose();
+    } catch (err) {
+      setError('Ürün güncellenirken hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!urun) return null;
@@ -74,8 +109,8 @@ const UrunDuzenle = ({ open, onClose, urun }) => {
               <TextField
                 fullWidth
                 label="Ürün Adı"
-                name="ad"
-                value={formData.ad}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 required
               />
@@ -131,9 +166,9 @@ const UrunDuzenle = ({ open, onClose, urun }) => {
               <TextField
                 fullWidth
                 label="Fiyat (TL)"
-                name="fiyat"
+                name="price"
                 type="number"
-                value={formData.fiyat}
+                value={formData.price}
                 onChange={handleChange}
                 required
                 inputProps={{ min: 0, step: "0.01" }}
@@ -143,9 +178,9 @@ const UrunDuzenle = ({ open, onClose, urun }) => {
               <TextField
                 fullWidth
                 label="Stok Adedi"
-                name="stok"
+                name="stock"
                 type="number"
-                value={formData.stok}
+                value={formData.stock}
                 onChange={handleChange}
                 required
                 inputProps={{ min: 0 }}
@@ -177,20 +212,25 @@ const UrunDuzenle = ({ open, onClose, urun }) => {
               <TextField
                 fullWidth
                 label="Açıklama"
-                name="aciklama"
-                value={formData.aciklama}
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
                 required
                 multiline
                 rows={4}
               />
             </Grid>
+            {error && (
+              <Grid item xs={12}>
+                <span style={{ color: 'red' }}>{error}</span>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>İptal</Button>
-          <Button type="submit" variant="contained" color="primary">
-            Değişiklikleri Kaydet
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
           </Button>
         </DialogActions>
       </form>

@@ -14,27 +14,36 @@ import {
 } from '@mui/material';
 import { ShoppingCart, Favorite } from '@mui/icons-material';
 import { addToCart } from '../../store/slices/cartSlice';
-import { toggleFavorite, selectIsFavorite } from '../../store/slices/favoritesSlice';
+import { addFavorite, removeFavorite, selectIsFavorite } from '../../store/slices/favoritesSlice';
 
 const UrunKarti = ({ urun }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const isFavorite = useSelector(state => selectIsFavorite(state, urun?.id));
+  const token = localStorage.getItem('token');
+  const isFavorite = useSelector(selectIsFavorite(urun?._id));
 
-  if (!urun || !urun.id) {
+  if (!urun || !urun._id) {
     return null;
   }
 
   const handleAddToCart = () => {
-    dispatch(addToCart(urun));
+    dispatch(addToCart({ ...urun, id: urun._id }));
   };
 
   const handleToggleFavorite = () => {
-    dispatch(toggleFavorite(urun));
+    if (!token) {
+      navigate('/auth/giris');
+      return;
+    }
+    if (isFavorite) {
+      dispatch(removeFavorite({ productId: urun._id, token }));
+    } else {
+      dispatch(addFavorite({ productId: urun._id, token }));
+    }
   };
 
   const handleClick = () => {
-    navigate(`/urun/${urun.id}`);
+    navigate(`/urun/${urun._id}`);
   };
 
   return (
