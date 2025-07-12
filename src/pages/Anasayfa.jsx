@@ -13,7 +13,6 @@ import {
   Divider,
   IconButton,
   useTheme,
-  Skeleton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';

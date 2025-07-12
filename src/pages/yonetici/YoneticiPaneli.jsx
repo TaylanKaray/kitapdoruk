@@ -110,19 +110,19 @@ const YoneticiPaneli = () => {
     fetchOrders();
   }, [token, isAdmin]);
 
-  const fetchUsers = async () => {
-    if (isAdmin && token) {
-      setUsersLoading(true);
-      try {
-        const res = await axios.get(`${API_URL}/users/all`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUsers(res.data);
-      } catch {}
-      setUsersLoading(false);
-    }
-  };
   useEffect(() => {
+    async function fetchUsers() {
+      if (isAdmin && token) {
+        setUsersLoading(true);
+        try {
+          const res = await axios.get(`${API_URL}/users/all`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUsers(res.data);
+        } catch {}
+        setUsersLoading(false);
+      }
+    }
     fetchUsers();
   }, [fetchUsers]);
 
