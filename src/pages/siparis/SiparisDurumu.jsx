@@ -6,15 +6,9 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Box,
-  Button,
   Grid,
   Card,
   CardContent,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import axios from 'axios';
 

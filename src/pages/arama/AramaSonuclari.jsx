@@ -5,7 +5,6 @@ import {
   Typography,
   Grid,
   Box,
-  CircularProgress,
 } from '@mui/material';
 import UrunKarti from '../../components/urun/UrunKarti';
 import { selectSearchQuery, selectSearchResults } from '../../store/slices/searchSlice';

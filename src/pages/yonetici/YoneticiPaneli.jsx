@@ -122,7 +122,9 @@ const YoneticiPaneli = () => {
       setUsersLoading(false);
     }
   };
-  useEffect(() => { fetchUsers(); }, [token, isAdmin]);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleUserDelete = async (id) => {
     setUserActionLoading(true);

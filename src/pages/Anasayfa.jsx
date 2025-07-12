@@ -20,8 +20,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   ShoppingCart as ShoppingCartIcon,
   Favorite as FavoriteIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { addToCart } from '../store/slices/cartSlice';
 import { addFavorite, removeFavorite, selectIsFavorite } from '../store/slices/favoritesSlice';
@@ -74,76 +72,6 @@ const kategoriler = [
     isim: 'Sözlükler ve Ansiklopediler',
     resim: '/kategoriler/sozlukler-ansiklopediler.svg',
     aciklama: 'Kapsamlı sözlükler ve ansiklopediler',
-  },
-];
-
-const cokSatanKitaplar = [
-  {
-    id: '1',
-    ad: 'Türkçe 1. Sınıf Ders Kitabı',
-    yazar: 'Milli Eğitim Bakanlığı',
-    fiyat: 25.90,
-    resimUrl: '/kitaplar/turkce1.jpg',
-    stok: 50,
-  },
-  {
-    id: '2',
-    ad: 'Matematik 1. Sınıf Ders Kitabı',
-    yazar: 'Milli Eğitim Bakanlığı',
-    fiyat: 22.90,
-    resimUrl: '/kitaplar/matematik1.jpg',
-    stok: 45,
-  },
-  {
-    id: '5',
-    ad: 'Fen Bilimleri 7. Sınıf',
-    yazar: 'Osman Hare',
-    fiyat: 45.90,
-    resimUrl: '/kitaplar/fen7.jpg',
-    stok: 60,
-  },
-  {
-    id: '6',
-    ad: 'İngilizce 6. Sınıf',
-    yazar: 'Koray Varol Komisyon',
-    fiyat: 38.50,
-    resimUrl: '/kitaplar/ingilizce6.jpg',
-    stok: 40,
-  },
-];
-
-const yeniCikanKitaplar = [
-  {
-    id: '13',
-    ad: 'LGS Deneme Seti',
-    yazar: 'Sınav Komisyonu',
-    fiyat: 129.90,
-    resimUrl: '/kitaplar/lgsdeneme.jpg',
-    stok: 150,
-  },
-  {
-    id: '12',
-    ad: 'Çizgi Çalışmaları',
-    yazar: 'Sevgi Öztürk',
-    fiyat: 34.90,
-    resimUrl: '/kitaplar/cizgicalismalari.jpg',
-    stok: 40,
-  },
-  {
-    id: '3',
-    ad: 'Renkler ve Şekiller',
-    yazar: 'Alp Gökalp',
-    fiyat: 18.50,
-    resimUrl: '/kitaplar/renkler.jpg',
-    stok: 30,
-  },
-  {
-    id: '7',
-    ad: 'Zeka Oyunları Seti',
-    yazar: 'Redka',
-    fiyat: 89.90,
-    resimUrl: '/kitaplar/zekaoyunlari.jpg',
-    stok: 15,
   },
 ];
 
