@@ -45,19 +45,15 @@ const Header = () => {
   const cartItemCount = useSelector(selectCartItemCount);
   const favoriteItems = useSelector(selectFavoriteItems);
   const [allProducts, setAllProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoadingProducts(true);
       try {
         const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
         const res = await axios.get(`${API_URL}/products`);
         setAllProducts(res.data);
       } catch (err) {
         setAllProducts([]);
-      } finally {
-        setLoadingProducts(false);
       }
     };
     fetchProducts();

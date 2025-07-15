@@ -10,7 +10,6 @@ import {
   Button,
   Box,
   Paper,
-  Divider,
   IconButton,
   useTheme,
   FormControl,
@@ -21,7 +20,7 @@ import {
   FormControlLabel,
   Slider,
 } from '@mui/material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   ShoppingCart as ShoppingCartIcon,
