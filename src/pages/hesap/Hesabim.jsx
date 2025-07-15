@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, TextField, Button, Box, Divider, Grid, Paper } from '@mui/material';
-import { jwtDecode } from 'jwt-decode';
+import { Container, Typography, TextField, Button, Box, Divider, Paper } from '@mui/material';
 import axios from 'axios';
 
 const Hesabim = () => {
   const [user, setUser] = useState({ name: '', surname: '', email: '' });
-  const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ name: '', surname: '', email: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,7 +57,6 @@ const Hesabim = () => {
   const handleSave = (e) => {
     e.preventDefault();
     setUser(form);
-    setEditMode(false);
     // Burada backend'e güncelleme isteği gönderilebilir
   };
 

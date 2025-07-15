@@ -23,7 +23,6 @@ import {
 import { selectCartItemCount } from '../../store/slices/cartSlice';
 import { selectFavoriteItems } from '../../store/slices/favoritesSlice';
 import { setSearchQuery, setSearchResults } from '../../store/slices/searchSlice';
-import { selectTumUrunler } from '../../store/slices/urunlerSlice';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 
