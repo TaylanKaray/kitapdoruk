@@ -10,6 +10,7 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
+import axios from 'axios';
 
 const Iletisim = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ const Iletisim = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -46,15 +47,24 @@ const Iletisim = () => {
       return;
     }
 
-    // Burada mesaj gönderme işlemi yapılacak
-    // Başarılı gönderim sonrası:
-    setSuccess(true);
-    setFormData({
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
-    });
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/contact`, {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message
+      }, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      setSuccess(true);
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+      });
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+    }
   };
 
   const handleCloseSnackbar = () => {

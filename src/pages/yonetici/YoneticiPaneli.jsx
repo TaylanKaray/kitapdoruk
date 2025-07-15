@@ -46,6 +46,8 @@ const YoneticiPaneli = () => {
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userActionLoading, setUserActionLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -115,7 +117,7 @@ const YoneticiPaneli = () => {
       if (isAdmin && token) {
         setUsersLoading(true);
         try {
-          const response = await axios.get(`${API_URL}/users`, {
+          const response = await axios.get(`${API_URL}/users/all`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUsers(response.data);
@@ -126,6 +128,24 @@ const YoneticiPaneli = () => {
       }
     }
     fetchUsers();
+  }, [isAdmin, token]);
+
+  useEffect(() => {
+    async function fetchMessages() {
+      if (isAdmin && token) {
+        setMessagesLoading(true);
+        try {
+          const response = await axios.get(`${API_URL}/contact/all`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setMessages(response.data);
+        } catch {
+          setMessages([]);
+        }
+        setMessagesLoading(false);
+      }
+    }
+    fetchMessages();
   }, [isAdmin, token]);
 
   const handleUserDelete = async (id) => {
@@ -325,7 +345,39 @@ const YoneticiPaneli = () => {
     </Box>
   );
 
-  const siparisDurumlari = ['Hazırlanıyor', 'Kargoda', 'Teslim Edildi'];
+  const renderGelenMesajlar = () => (
+    <Box sx={{ mt: 3 }}>
+      <Typography variant="h6" gutterBottom>Gelen Mesajlar</Typography>
+      {messagesLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Ad Soyad</TableCell>
+                <TableCell>E-posta</TableCell>
+                <TableCell>Mesaj</TableCell>
+                <TableCell>Tarih</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {messages.map((msg) => (
+                <TableRow key={msg._id}>
+                  <TableCell>{msg.name}</TableCell>
+                  <TableCell>{msg.email}</TableCell>
+                  <TableCell>{msg.message}</TableCell>
+                  <TableCell>{new Date(msg.createdAt).toLocaleString('tr-TR')}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Box>
+  );
+
+  const siparisDurumlari = ['Hazırlanıyor', 'Kargoda', 'Teslim Edildi', 'İptal Edildi'];
   const handleSiparisDurumGuncelle = async (orderId, newStatus) => {
     try {
       await axios.put(`${API_URL}/orders/${orderId}`, { status: newStatus }, {
@@ -409,12 +461,14 @@ const YoneticiPaneli = () => {
           <Tab label="Ürün Yönetimi" />
           <Tab label="Sipariş Yönetimi" />
           <Tab label="Kullanıcı Yönetimi" />
+          <Tab label="Gelen Mesajlar" />
         </Tabs>
       </Box>
 
       {activeTab === 0 && renderUrunYonetimi()}
       {activeTab === 1 && renderSiparisYonetimi()}
       {activeTab === 2 && renderKullaniciYonetimi()}
+      {activeTab === 3 && renderGelenMesajlar()}
     </Container>
   );
 };

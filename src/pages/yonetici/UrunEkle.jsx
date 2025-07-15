@@ -10,7 +10,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid
+  Grid,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
 import axios from 'axios';
 
@@ -29,16 +31,18 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const UrunEkle = ({ open, onClose, onUrunEklendi }) => {
   const [urun, setUrun] = useState({
-    name: '',
-    description: '',
-    price: '',
-    stock: '',
+    ad: '',
+    aciklama: '',
+    fiyat: '',
+    stok: '',
     kategori: '',
     yayinevi: '',
     yazar: '',
     sayfaSayisi: '',
     isbn: '',
-    resimUrl: ''
+    resimUrl: '',
+    cokSatan: false,
+    yeniCikan: false
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -58,33 +62,37 @@ const UrunEkle = ({ open, onClose, onUrunEklendi }) => {
     const token = localStorage.getItem('token');
     try {
       const res = await axios.post(`${API_URL}/products`, {
-        name: urun.name,
-        description: urun.description,
-        price: parseFloat(urun.price),
-        stock: parseInt(urun.stock),
+        ad: urun.ad,
+        aciklama: urun.aciklama,
+        fiyat: parseFloat(urun.fiyat),
+        stok: parseInt(urun.stok),
         kategori: urun.kategori,
         yayinevi: urun.yayinevi,
         yazar: urun.yazar,
         sayfaSayisi: urun.sayfaSayisi,
         isbn: urun.isbn,
-        resimUrl: urun.resimUrl
+        resimUrl: urun.resimUrl,
+        cokSatan: urun.cokSatan,
+        yeniCikan: urun.yeniCikan
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (onUrunEklendi) onUrunEklendi(res.data.product);
-      onClose();
-      setUrun({
-        name: '',
-        description: '',
-        price: '',
-        stock: '',
-        kategori: '',
-        yayinevi: '',
-        yazar: '',
-        sayfaSayisi: '',
-        isbn: '',
-        resimUrl: ''
-      });
+    onClose();
+    setUrun({
+      ad: '',
+      aciklama: '',
+      fiyat: '',
+      stok: '',
+      kategori: '',
+      yayinevi: '',
+      yazar: '',
+      sayfaSayisi: '',
+      isbn: '',
+      resimUrl: '',
+      cokSatan: false,
+      yeniCikan: false
+    });
     } catch (err) {
       setError('Ürün eklenirken hata oluştu.');
     } finally {
@@ -102,8 +110,8 @@ const UrunEkle = ({ open, onClose, onUrunEklendi }) => {
               <TextField
                 fullWidth
                 label="Ürün Adı"
-                name="name"
-                value={urun.name}
+                name="ad"
+                value={urun.ad}
                 onChange={handleChange}
                 required
               />
@@ -159,9 +167,9 @@ const UrunEkle = ({ open, onClose, onUrunEklendi }) => {
               <TextField
                 fullWidth
                 label="Fiyat (TL)"
-                name="price"
+                name="fiyat"
                 type="number"
-                value={urun.price}
+                value={urun.fiyat}
                 onChange={handleChange}
                 required
                 inputProps={{ min: 0, step: "0.01" }}
@@ -171,9 +179,9 @@ const UrunEkle = ({ open, onClose, onUrunEklendi }) => {
               <TextField
                 fullWidth
                 label="Stok Adedi"
-                name="stock"
+                name="stok"
                 type="number"
-                value={urun.stock}
+                value={urun.stok}
                 onChange={handleChange}
                 required
                 inputProps={{ min: 0 }}
@@ -205,13 +213,17 @@ const UrunEkle = ({ open, onClose, onUrunEklendi }) => {
               <TextField
                 fullWidth
                 label="Açıklama"
-                name="description"
-                value={urun.description}
+                name="aciklama"
+                value={urun.aciklama}
                 onChange={handleChange}
                 required
                 multiline
                 rows={4}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel control={<Checkbox checked={urun.cokSatan} onChange={e => setUrun(prev => ({ ...prev, cokSatan: e.target.checked }))} name="cokSatan" />} label="Çok Satan" />
+              <FormControlLabel control={<Checkbox checked={urun.yeniCikan} onChange={e => setUrun(prev => ({ ...prev, yeniCikan: e.target.checked }))} name="yeniCikan" />} label="Yeni Çıkan" />
             </Grid>
             {error && (
               <Grid item xs={12}>

@@ -71,7 +71,7 @@ const Odeme = () => {
       navigate('/siparis-durumu');
     } catch (err) {
       setInfo('Siparişiniz alındı ve RabbitMQ kuyruğuna mesaj gönderildi!');
-      navigate('/siparis-durumu');
+    navigate('/siparis-durumu');
     }
   };
 

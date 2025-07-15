@@ -22,12 +22,14 @@ const UrunKarti = ({ urun }) => {
   const token = localStorage.getItem('token');
   const isFavorite = useSelector(selectIsFavorite(urun?._id));
 
-  if (!urun || !urun._id) {
+  if (!urun || (!urun._id && !urun.id)) {
     return null;
   }
 
+  const urunId = urun._id || urun.id;
+
   const handleAddToCart = () => {
-    dispatch(addToCart({ ...urun, id: urun._id }));
+    dispatch(addToCart({ ...urun, id: urunId }));
   };
 
   const handleToggleFavorite = () => {
@@ -36,14 +38,14 @@ const UrunKarti = ({ urun }) => {
       return;
     }
     if (isFavorite) {
-      dispatch(removeFavorite({ productId: urun._id, token }));
+      dispatch(removeFavorite({ productId: urunId, token }));
     } else {
-      dispatch(addFavorite({ productId: urun._id, token }));
+      dispatch(addFavorite({ productId: urunId, token }));
     }
   };
 
   const handleClick = () => {
-    navigate(`/urun/${urun._id}`);
+    navigate(`/urun/${urunId}`);
   };
 
   return (
@@ -78,7 +80,7 @@ const UrunKarti = ({ urun }) => {
           </Typography>
         </Box>
         <Typography variant="h6" color="primary">
-          {urun.fiyat.toFixed(2)} ₺
+          {typeof urun.fiyat === "number" ? urun.fiyat.toFixed(2) + ' ₺' : 'Fiyat Yok'}
         </Typography>
         <Typography variant="body2" color={urun.stok > 0 ? "success.main" : "error.main"}>
           {urun.stok > 0 ? 'Stokta' : 'Tükendi'}

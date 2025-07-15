@@ -24,7 +24,9 @@ export const register = createAsyncThunk(
     try {
       const response = await axios.post(`${API_URL}/auth/register`, {
         email: credentials.email,
-        password: credentials.sifre
+        password: credentials.sifre,
+        name: credentials.ad,
+        surname: credentials.soyad
       });
       return response.data;
     } catch (error) {

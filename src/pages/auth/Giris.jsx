@@ -53,7 +53,7 @@ const Giris = () => {
       } else if (typeof error === 'string') {
         setHata(error);
       } else {
-        setHata('Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edin.');
+      setHata('Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edin.');
       }
     }
   };

@@ -155,7 +155,7 @@ const Favorilerim = () => {
         </Grid>
 
         {detailedFavorites.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item._id}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item._id || item.id}>
             <Card>
               <CardMedia
                 component="img"

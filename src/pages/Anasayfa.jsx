@@ -13,8 +13,15 @@ import {
   Divider,
   IconButton,
   useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  Slider,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   ShoppingCart as ShoppingCartIcon,
@@ -77,17 +84,22 @@ const kategoriler = [
 const UrunKarti = ({ urun }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const isFavorite = useSelector(selectIsFavorite(urun.id));
+  const token = localStorage.getItem('token');
+  const isFavorite = useSelector(selectIsFavorite(urun._id));
 
   const handleAddToCart = () => {
     dispatch(addToCart({ ...urun, adet: 1 }));
   };
 
   const handleToggleFavorite = () => {
+    if (!token) {
+      navigate('/auth/giris');
+      return;
+    }
     if (isFavorite) {
-      dispatch(removeFavorite(urun.id));
+      dispatch(removeFavorite({ productId: urun._id, token }));
     } else {
-      dispatch(addFavorite(urun));
+      dispatch(addFavorite({ productId: urun._id, token }));
     }
   };
 
@@ -180,6 +192,10 @@ const KategoriKarti = ({ kategori }) => {
 
 const Anasayfa = () => {
   const [urunler, setUrunler] = useState([]);
+  const [selectedKategori, setSelectedKategori] = useState('');
+  const [fiyatAralik, setFiyatAralik] = useState([0, 1000]);
+  const [filtreCokSatan, setFiltreCokSatan] = useState(false);
+  const [filtreYeniCikan, setFiltreYeniCikan] = useState(false);
 
   useEffect(() => {
     const fetchUrunler = async () => {
@@ -194,95 +210,35 @@ const Anasayfa = () => {
     fetchUrunler();
   }, []);
 
+  const minFiyat = Math.min(...urunler.map(u => u.fiyat));
+  const maxFiyat = Math.max(...urunler.map(u => u.fiyat));
+
+  const handleFiyatAralik = (e, newValue) => setFiyatAralik(newValue);
+
+  const filtreliUrunler = urunler.filter(u =>
+    (selectedKategori ? u.kategori === selectedKategori : true) &&
+    u.fiyat >= fiyatAralik[0] && u.fiyat <= fiyatAralik[1] &&
+    (!filtreCokSatan || u.cokSatan) &&
+    (!filtreYeniCikan || u.yeniCikan)
+  ).map(u => ({...u, _id: u._id || u.id, id: u.id || u._id }));
+
+  // Çok Satanlar ve Yeni Çıkanlar filtreleri
+  const cokSatanlar = urunler.filter(u => u.cokSatan).map(u => ({...u, _id: u._id || u.id, id: u.id || u._id }));
+  const yeniCikanlar = urunler.filter(u => u.yeniCikan).map(u => ({...u, _id: u._id || u.id, id: u.id || u._id }));
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       {/* Hero Section */}
       <Paper
-        sx={{
-          p: { xs: 2, md: 3 },
-          mb: 4,
-          background: 'linear-gradient(135deg, #4a90e2 0%, #357abd 100%)',
-          color: 'white',
-          borderRadius: 2,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            background: 'url(/kategoriler/hero-pattern.svg) repeat',
-            opacity: 0.1,
-          }
-        }}
+        elevation={3}
+        sx={{ p: 4, mb: 4, background: 'linear-gradient(90deg, #e3ffe6 0%, #f7f7ff 100%)' }}
       >
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography 
-            variant="h2" 
-            gutterBottom
-            sx={{
-              fontWeight: 'bold',
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-              mb: 2
-            }}
-          >
-            Kitaplarla Dolu
-            <br />
-            Bir Dünyaya
-            <br />
-            Hoş Geldiniz!
-          </Typography>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              mb: 3,
-              maxWidth: '600px',
-              lineHeight: 1.6,
-              opacity: 0.9
-            }}
-          >
-            Eğitim ve öğrenme yolculuğunuzda size rehberlik edecek binlerce kitap burada.
-            Hayallerinize giden yolda size eşlik etmekten mutluluk duyuyoruz.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button 
-              variant="contained" 
-              color="secondary" 
-              size="large"
-              sx={{ 
-                px: 3, 
-                py: 1.25,
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #f50057 30%, #ff4081 90%)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #c51162 30%, #f50057 90%)',
-                }
-              }}
-            >
-              Keşfetmeye Başla
-            </Button>
-            <Button 
-              variant="outlined" 
-              size="large"
-              sx={{ 
-                px: 3, 
-                py: 1.25,
-                fontSize: '1rem',
-                color: 'white',
-                borderColor: 'white',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }
-              }}
-            >
-              Kategorileri İncele
-            </Button>
-          </Box>
-        </Box>
+        <Typography variant="h4" fontWeight={700} gutterBottom>
+          Hoşgeldiniz!
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          En popüler ve yeni çıkan kitapları keşfedin.
+        </Typography>
       </Paper>
 
       {/* Kategoriler */}
@@ -297,7 +253,59 @@ const Anasayfa = () => {
         ))}
       </Grid>
 
-      <Divider sx={{ my: 6 }} />
+      {/* Filtre Paneli */}
+      <Box sx={{ mb: 4, p: 2, border: 1, borderColor: 'divider', borderRadius: 2, bgcolor: 'background.paper' }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth>
+              <InputLabel>Kategori</InputLabel>
+              <Select
+                value={selectedKategori}
+                label="Kategori"
+                onChange={e => setSelectedKategori(e.target.value)}
+              >
+                <MenuItem value="">Tümü</MenuItem>
+                {kategoriler.map(k => (
+                  <MenuItem key={k.isim} value={k.isim}>{k.isim}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography id="fiyat-slider" gutterBottom>Fiyat Aralığı</Typography>
+            <Slider
+              value={fiyatAralik}
+              onChange={handleFiyatAralik}
+              valueLabelDisplay="auto"
+              min={minFiyat}
+              max={maxFiyat}
+              step={1}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2">{fiyatAralik[0]} TL</Typography>
+              <Typography variant="body2">{fiyatAralik[1]} TL</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <FormControlLabel
+              control={<Checkbox checked={filtreCokSatan} onChange={e => setFiltreCokSatan(e.target.checked)} />}
+              label="Çok Satanlar"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={filtreYeniCikan} onChange={e => setFiltreYeniCikan(e.target.checked)} />}
+              label="Yeni Çıkanlar"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Button variant="outlined" color="secondary" fullWidth onClick={() => {
+              setSelectedKategori('');
+              setFiyatAralik([minFiyat, maxFiyat]);
+              setFiltreCokSatan(false);
+              setFiltreYeniCikan(false);
+            }}>Filtreleri Sıfırla</Button>
+          </Grid>
+        </Grid>
+      </Box>
 
       {/* Tüm Kitaplar */}
       <Box sx={{ mb: 6 }}>
@@ -305,11 +313,47 @@ const Anasayfa = () => {
           Tüm Kitaplar
         </Typography>
         <Grid container spacing={3}>
-          {urunler.map((urun) => (
-            <Grid item xs={12} sm={6} md={3} key={urun._id}>
-              <UrunKarti urun={urun} />
+          {filtreliUrunler.map((urun) => (
+            <Grid item xs={12} sm={6} md={4} key={urun._id || urun.id}>
+              <UrunKarti urun={{ ...urun, _id: urun._id || urun.id, id: urun.id || urun._id }} />
             </Grid>
           ))}
+        </Grid>
+      </Box>
+
+      {/* Çok Satanlar */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom>
+          Çok Satanlar
+        </Typography>
+        <Grid container spacing={3}>
+          {cokSatanlar.length > 0 ? (
+            cokSatanlar.map((urun) => (
+              <Grid item xs={12} sm={6} md={3} key={urun._id || urun.id}>
+                <UrunKarti urun={{ ...urun, _id: urun._id || urun.id, id: urun.id || urun._id }} />
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}><Typography color="text.secondary">Çok satan kitap yok.</Typography></Grid>
+          )}
+        </Grid>
+      </Box>
+
+      {/* Yeni Çıkanlar */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom>
+          Yeni Çıkanlar
+        </Typography>
+        <Grid container spacing={3}>
+          {yeniCikanlar.length > 0 ? (
+            yeniCikanlar.map((urun) => (
+              <Grid item xs={12} sm={6} md={3} key={urun._id || urun.id}>
+                <UrunKarti urun={{ ...urun, _id: urun._id || urun.id, id: urun.id || urun._id }} />
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}><Typography color="text.secondary">Yeni çıkan kitap yok.</Typography></Grid>
+          )}
         </Grid>
       </Box>
     </Container>

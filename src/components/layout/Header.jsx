@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -24,6 +24,8 @@ import { selectCartItemCount } from '../../store/slices/cartSlice';
 import { selectFavoriteItems } from '../../store/slices/favoritesSlice';
 import { setSearchQuery, setSearchResults } from '../../store/slices/searchSlice';
 import { selectTumUrunler } from '../../store/slices/urunlerSlice';
+import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 
 const kategoriler = [
   { ad: 'Ana Sınıfı Kitapları', path: '/kategori/ana-sinif' },
@@ -43,7 +45,39 @@ const Header = () => {
   const dispatch = useDispatch();
   const cartItemCount = useSelector(selectCartItemCount);
   const favoriteItems = useSelector(selectFavoriteItems);
-  const urunler = useSelector(selectTumUrunler);
+  const [allProducts, setAllProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoadingProducts(true);
+      try {
+        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${API_URL}/products`);
+        setAllProducts(res.data);
+      } catch (err) {
+        setAllProducts([]);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Kullanıcı bilgisi
+  let user = null;
+  let isAdmin = false;
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      user = decoded;
+      isAdmin = decoded.isAdmin;
+    } catch (e) {
+      user = null;
+      isAdmin = false;
+    }
+  }
 
   const handleKategoriMenuOpen = (event) => {
     setKategoriMenuAnchor(event.currentTarget);
@@ -58,11 +92,15 @@ const Header = () => {
     if (!searchValue.trim()) return;
 
     const query = searchValue.toLowerCase().trim();
-    const results = urunler.filter(urun =>
-      urun.ad.toLowerCase().includes(query) ||
-      urun.yazar.toLowerCase().includes(query) ||
-      urun.kategori.toLowerCase().includes(query)
-    );
+    const results = allProducts.filter(urun =>
+      (urun.ad && urun.ad.toLowerCase().includes(query)) ||
+      (urun.yazar && urun.yazar.toLowerCase().includes(query)) ||
+      (urun.kategori && urun.kategori.toLowerCase().includes(query))
+    ).map(urun => ({
+      ...urun,
+      _id: urun._id || urun.id,
+      id: urun.id || urun._id
+    }));
 
     dispatch(setSearchQuery(searchValue));
     dispatch(setSearchResults(results));
@@ -155,6 +193,12 @@ const Header = () => {
 
         {/* Sağ Menü */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Admin Paneli */}
+          {isAdmin && (
+            <Button color="inherit" component={Link} to="/yonetici">
+              Yönetici Paneli
+            </Button>
+          )}
           <Tooltip title="Favorilerim">
             <IconButton
               color="inherit"
@@ -181,28 +225,40 @@ const Header = () => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Hesabım">
-            <IconButton
-              color="inherit"
-              component={Link}
-              to="/hesabim"
-              sx={{ position: 'relative' }}
-            >
-              <AccountCircle />
-            </IconButton>
-          </Tooltip>
+          {/* Kullanıcı adı veya Hesabım */}
+          {user ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Button color="inherit" component={Link} to="/siparis-durumu">
+                Siparişlerim
+              </Button>
+              <Tooltip title="Hesabım">
+                <IconButton
+                  color="inherit"
+                  component={Link}
+                  to="/hesabim"
+                  sx={{ position: 'relative' }}
+                >
+                  <AccountCircle />
+                </IconButton>
+              </Tooltip>
+              <span style={{ fontWeight: 500, marginRight: 8 }}>{user.name || user.ad || user.email}</span>
+              <Button color="inherit" onClick={handleLogout}>
+                Çıkış Yap
+              </Button>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Button color="inherit" component={Link} to="/giris">
+                Giriş Yap
+              </Button>
+            </Box>
+          )}
 
           <Button color="inherit" component={Link} to="/iletisim">
             İletişim
           </Button>
-          <Button color="inherit" component={Link} to="/giris">
-            Giriş Yap
-          </Button>
           <Button color="inherit" component={Link} to="/kayit">
             Üye Ol
-          </Button>
-          <Button color="inherit" onClick={handleLogout} style={{ marginLeft: 16, padding: '6px 12px', background: '#1976d2', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
-            Çıkış
           </Button>
         </Box>
       </Toolbar>

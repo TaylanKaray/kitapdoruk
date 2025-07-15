@@ -29,6 +29,8 @@ import OkumaKitaplari from './pages/kategoriler/OkumaKitaplari';
 import DenemeSinavlari from './pages/kategoriler/DenemeSinavlari';
 import SozluklerAnsiklopedi from './pages/kategoriler/SozluklerAnsiklopedi';
 import AramaSonuclari from './pages/arama/AramaSonuclari';
+import CokSatanlar from './pages/cokSatanlar';
+import YeniCikanlar from './pages/yeniCikanlar';
 
 function App() {
   return (
@@ -52,6 +54,8 @@ function App() {
               <Route path="/odeme" element={<Odeme />} />
               <Route path="/arama" element={<AramaSonuclari />} />
               <Route path="/iletisim" element={<Iletisim />} />
+              <Route path="/cok-satanlar" element={<CokSatanlar />} />
+              <Route path="/yeni-cikanlar" element={<YeniCikanlar />} />
 
               {/* Kategori Route'ları */}
               <Route path="/kategori/ana-sinif" element={<AnaSinifKitaplari />} />
