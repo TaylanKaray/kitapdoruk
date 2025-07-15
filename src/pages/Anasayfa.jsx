@@ -20,7 +20,7 @@ import {
   FormControlLabel,
   Slider,
 } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   ShoppingCart as ShoppingCartIcon,
